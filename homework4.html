@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>	
+<meta charset="UTF-8" />
+<title>View Trucking List</title>
+
+<script type="text/javascript">
+    function generateHTML(jsonObj) {
+    html_text = "<html><head><title>Top Trucking Companies</title></head><body>";
+    html_text += "<table border = '2'>";
+    html_text += "<tr>";
+    for (i = 0; i < jsonObj.Mainline.Table.Header.Data.length; i++) {
+          html_text += "<td style=\"text-align: center;\"><strong>" + jsonObj.Mainline.Table.Header.Data[i] + "</strong></td>";
+    }
+    html_text += "</tr>";
+    for (k = 0; k < jsonObj.Mainline.Table.Row.length; k++) {
+        html_text += "<tr>"
+        html_text += "<td>" + jsonObj.Mainline.Table.Row[k].Company + "</td>";
+        html_text += "<td>" + jsonObj.Mainline.Table.Row[k].Services + "</td>";
+        html_text += "<td><ul>";
+        if (jsonObj.Mainline.Table.Row[k].Hubs.Hub.length >0) {
+            html_text += "<li><strong>" + jsonObj.Mainline.Table.Row[k].Hubs.Hub[0] + "</strong></li>";
+        }
+        for (j = 1; j < jsonObj.Mainline.Table.Row[k].Hubs.Hub.length; j++) {
+            html_text += "<li>" + jsonObj.Mainline.Table.Row[k].Hubs.Hub[j] + "</li>";
+        }
+        html_text += "</ul></td>";
+        html_text += "<td>" + jsonObj.Mainline.Table.Row[k].Revenue + "</td>";
+        html_text += "<td>" + "<a href = '" + jsonObj.Mainline.Table.Row[k].HomePage + "'>" + jsonObj.Mainline.Table.Row[k].HomePage + "</a>" + "</td>";
+        html_text += "<td>" + "<img src = " + jsonObj.Mainline.Table.Row[k].Logo + " width = 300; height = 150; />" + "</td></tr>";
+    }
+   html_text += "</table></body></html>";
+}
+</script>
+
+<script type = "text/javascript">     
+function viewJSON(what){ 
+    var URL = what.URL.value;  
+    if (URL == "") {
+            alert("Please enter a JSON file name!");
+   	        return null;    
+        }
+    function loadJSON(url) {
+        if (window.XMLHttpRequest) {        // code for IE7+, Firefox, Chrome, Opera, Safari
+            xmlhttp = new XMLHttpRequest(); 
+        } else {                            // code for IE6, IE5
+            xmlhttp = new ActiveXObject("Microsoft.XMLHTTP"); 
+        } 
+        try{
+            xmlhttp.open("GET", url, false); 
+            xmlhttp.send();
+            jsonObj = JSON.parse(xmlhttp.responseText);
+   	    }  
+   	    catch(error){
+   	        alert("The JSON file does not exist!");
+   	        return null; 
+        }
+        return jsonObj; 
+    }
+
+    jsonObj = loadJSON(URL);
+    if (!jsonObj.hasOwnProperty('Mainline')) {
+        alert("The Json file is empty!");
+        return;
+    }
+
+ try{
+    Obj = jsonObj.Mainline.Table;
+    if (window.ActiveXObject) {             // if IE, simply execute script (due to async prop). 
+        if (jsonObj.parseError.errorCode != 0) {
+            var myErr = jsonObj.parseError;
+            generateError(jsonObj);
+            hWin = window.open("", "Error", "height=300, width=340"); 
+            hWin.document.write(html_text);
+        } else { 
+            if (!Obj.hasOwnProperty('Row')) {
+                alert("There is no trucking company in this JSON file!");
+                return;
+            } else {
+                generateHTML(jsonObj);
+                hWin = window.open("", "Assignment4", "height=700, width=1000"); 
+                hWin.document.write(html_text); 
+            }
+        }
+    } else{           // else if FF, execute script once JSON object has loaded 
+             if (!Obj.hasOwnProperty('Row')) {
+                alert("There is no trucking company in this JSON file!");
+                return;
+            } else {
+                generateHTML(jsonObj);
+                hWin = window.open("", "Assignment4", "height=700, width=1000"); 
+                hWin.document.write(html_text); 
+            }//else
+        }//elsewai
+    hWin.document.close(); 
+   }//try
+   catch(error){
+                alert("Invalid JSON file!");
+                }   
+}//function load
+</script>
+
+<style type="text/css">
+		h1{
+			position: relative;
+			text-align: center;
+			top: 150px;
+			height: 10px;
+		}
+		#k1{
+			position: relative;
+			width: 190px;
+			top: 175px;
+		}
+		#an1{
+			position: relative;
+			top: 195px;
+		}
+		#location{
+			text-align: center;
+		}
+</style>
+</head>
+<body>
+<h1>Enter URL for Trucking List JSON File</h1>
+<form name="myform" method="POST" id="location">
+<input type="text" name="URL" maxlength="255" size="100" value="truckinglist.json" id="k1"/>
+<br />
+<input type="button" name="submit" value="Submit Query" onClick="viewJSON(this.form)"  id="an1"/>
+</form>
+</body>
+</html>
